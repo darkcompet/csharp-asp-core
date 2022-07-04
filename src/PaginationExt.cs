@@ -13,12 +13,12 @@ public static class PaginationExt {
 		}
 
 		// Maybe overflow
-		var offset = pagePos * pageSize;
+		var offset = (pagePos - 1) * pageSize;
 		if (offset < 0) {
 			offset = 0;
 		}
 
-		var items = queryable.Skip(offset).Take(pageSize).ToArray() ?? new T[0];
+		var items = queryable.Skip(offset).Take(pageSize).ToArray();
 
 		// This calculation is faster than `Math.Ceiling(items.Length / pageSize)`
 		var pageCount = (items.Length + pageSize - 1) / pageSize;
@@ -33,7 +33,7 @@ public static class PaginationExt {
 
 public class PagedResult<T> where T : class {
 	/// Item list in the page
-	public readonly T[] items;
+	public readonly T[]? items;
 
 	/// Position (1-index-based) of current page
 	public readonly int pagePos;
@@ -41,7 +41,7 @@ public class PagedResult<T> where T : class {
 	/// Total number of page
 	public readonly int pageCount;
 
-	public PagedResult(T[] items, int pagePos, int pageCount) {
+	public PagedResult(T[]? items, int pagePos, int pageCount) {
 		this.items = items;
 		this.pagePos = pagePos;
 		this.pageCount = pageCount;
