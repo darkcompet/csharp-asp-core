@@ -1,27 +1,26 @@
 namespace Tool.Compet.Core;
 
+using Microsoft.EntityFrameworkCore;
+
 // Extension of IQueryable<T>
 // Where T: item type
 public static class PaginationExt {
 	/// @param pagePos From 1 (NOT from 0).
 	/// @param pageSize How many items in each page (for eg,. 10, 20, 50,...).
 	/// Note: given `pageIndex * pageSize` must be in range of Int32.
-	public static PagedResult<T> PaginateDk<T>(this IQueryable<T> queryable, int pagePos = 1, int pageSize = 50) where T : class {
-		// Maybe zero-
-		if (pagePos < 1) {
-			pagePos = 1;
-		}
+	public static async Task<PagedResult<T>> PaginateDk<T>(this IQueryable<T> query, int pagePos = 1, int pageSize = 50) where T : class {
+		// Maybe zero- or overflow
+		var offset = Math.Max(0, (pagePos - 1) * pageSize);
 
-		// Maybe overflow
-		var offset = (pagePos - 1) * pageSize;
-		if (offset < 0) {
-			offset = 0;
-		}
+		// Use `CountAsync()` since we are using EF Core.
+		// Use `Count()` will lead to weird result.
+		var rowCount = await query.CountAsync();
 
-		var items = queryable.Skip(offset).Take(pageSize).ToArray();
+		// Now take some items in range [offset + 1, offset + pageSize]
+		var items = query.Skip(offset).Take(pageSize).ToArray();
 
-		// This calculation is faster than `Math.Ceiling(items.Length / pageSize)`
-		var pageCount = (items.Length + pageSize - 1) / pageSize;
+		// This calculation is faster than `Math.Ceiling(rowCount / pageSize)`
+		var pageCount = (rowCount + pageSize - 1) / pageSize;
 
 		return new PagedResult<T>(
 			items: items,
