@@ -10,11 +10,11 @@ namespace Tool.Compet.Core {
 		/// </summary>
 		public static ValidationResponse Validate(object model) {
 			var context = new ValidationContext(model);
-			var results = new List<ValidationResult>();
+			var errors = new List<ValidationResult>();
 
-			var valid = Validator.TryValidateObject(model, context, results, true);
+			var valid = Validator.TryValidateObject(model, context, errors, true);
 
-			return new ValidationResponse(valid: valid, results: results);
+			return new ValidationResponse(valid: valid, errors: errors);
 		}
 
 		/// <summary>
@@ -27,11 +27,11 @@ namespace Tool.Compet.Core {
 
 	public class ValidationResponse {
 		public bool valid;
-		public List<ValidationResult> results;
+		public List<ValidationResult> errors;
 
-		public ValidationResponse(bool valid, List<ValidationResult> results) {
+		public ValidationResponse(bool valid, List<ValidationResult> errors) {
 			this.valid = valid;
-			this.results = results;
+			this.errors = errors;
 		}
 	}
 }
